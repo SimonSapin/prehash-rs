@@ -5,7 +5,16 @@ edition = "2021"
 license = "Apache-2.0 OR MIT"
 
 [dependencies]
+hashbrown = "0.14"
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[[bench]]
+name = "hashmap"
+harness = false
 
 [lib]
 test = false
 doctest = false
+bench = false
