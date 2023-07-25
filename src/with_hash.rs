@@ -14,9 +14,9 @@ pub struct WithHash<T: ?Sized> {
     value: T,
 }
 
-impl<T: Hash> WithHash<T> {
-    /// Computes the hash of `value` and returns a new [`WithHash`] struct.
-    pub fn new(value: T) -> Self {
+/// Computes the hash of `value` and returns a new [`WithHash`] struct.
+impl<T: Hash> From<T> for WithHash<T> {
+    fn from(value: T) -> Self {
         Self {
             hash: hash(&value),
             value,

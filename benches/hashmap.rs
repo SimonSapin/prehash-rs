@@ -9,9 +9,9 @@ use prehash::WithHash;
 fn bench_prehash_get(bencher: &mut Bencher<'_>) {
     let mut map = PreHashMap::new();
     for i in 0..100 {
-        map.insert(WithHash::new(format!("value # {i}")), i);
+        map.insert(WithHash::from(format!("value # {i}")), i);
     }
-    let key = WithHash::new("value # 12".to_owned());
+    let key = WithHash::from("value # 12".to_owned());
     bencher.iter(|| black_box(&map).get(black_box(&key)))
 }
 
