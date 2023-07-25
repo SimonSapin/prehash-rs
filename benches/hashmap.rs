@@ -11,7 +11,7 @@ fn bench_prehash_get(bencher: &mut Bencher<'_>) {
     for i in 0..100 {
         map.insert(WithHash::from(format!("value # {i}")), i);
     }
-    let key = WithHash::from("value # 12".to_owned());
+    let key: Box<WithHash<str>> = "value # 12".into();
     bencher.iter(|| black_box(&map).get(black_box(&key)))
 }
 

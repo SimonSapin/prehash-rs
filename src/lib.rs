@@ -4,6 +4,7 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::sync::OnceLock;
 
+mod alloc;
 mod map;
 mod with_hash;
 
@@ -15,7 +16,7 @@ pub use self::with_hash::WithHash;
 ///
 /// This is not as much DoS protection as the standard library’s default `HashMap`
 /// where each map gets its own `RandomState`.
-pub fn hash(value: &impl Hash) -> u64 {
+pub fn hash<T: ?Sized + Hash>(value: &T) -> u64 {
     static SHARED_RANDOM: OnceLock<RandomState> = OnceLock::new();
     let mut hasher = SHARED_RANDOM.get_or_init(RandomState::new).build_hasher();
     value.hash(&mut hasher);
