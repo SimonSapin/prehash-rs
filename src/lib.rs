@@ -6,9 +6,11 @@ use std::sync::OnceLock;
 
 mod alloc;
 mod map;
+mod rc;
 mod with_hash;
 
 pub use self::map::PreHashMap;
+pub use self::rc::Rc;
 pub use self::with_hash::WithHash;
 
 /// Computes and returns the hash of `value`,

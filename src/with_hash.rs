@@ -113,14 +113,14 @@ impl<T: ?Sized> PreHash for std::sync::Arc<WithHash<T>> {
 }
 
 impl<T> WithHash<[T]> {
-    fn new_raw_boxed_slice(input_slice: &'_ [T]) -> *mut Self
+    fn new_raw_boxed_slice(input_slice: &[T]) -> *mut Self
     where
         T: Copy + Hash,
     {
-        let (layout, value_offset) = Self::slice_layout(input_slice.len());
+        let (layout, value_offset) = Self::slice_layout_and_value_offset(input_slice);
         unsafe {
             // SAFETY: `layout` is not zero size since `WithHash` has a `hash: u64` field.
-            let struct_ptr: *mut u8 = crate::alloc::alloc(layout);
+            let struct_ptr: *mut u8 = crate::alloc::alloc(layout).as_ptr();
 
             // SAFETY: allocated from the appropriate layout
             Self::initialize(struct_ptr, value_offset, input_slice);
@@ -129,7 +129,8 @@ impl<T> WithHash<[T]> {
         }
     }
 
-    fn slice_layout(len: usize) -> (Layout, usize) {
+    pub(crate) fn slice_layout_and_value_offset(input_slice: &[T]) -> (Layout, usize) {
+        let len = input_slice.len();
         // SAFETY: must match the #[repr(C)] layout of the `WithHash` struct
         let hash_layout = Layout::new::<u64>();
         let value_layout = Layout::array::<T>(len).expect("layout computation overflow");
@@ -140,7 +141,7 @@ impl<T> WithHash<[T]> {
     }
 
     /// SAFETY: `struct_ptr` must be valid for the layout returned by `slice_layout`
-    unsafe fn initialize(struct_ptr: *mut u8, value_offset: usize, input_slice: &[T])
+    pub(crate) unsafe fn initialize(struct_ptr: *mut u8, value_offset: usize, input_slice: &[T])
     where
         T: Copy + Hash,
     {
@@ -157,7 +158,7 @@ impl<T> WithHash<[T]> {
         unsafe { value_ptr.copy_from_nonoverlapping(input_slice.as_ptr(), input_slice.len()) }
     }
 
-    fn as_wide_ptr(data: *mut u8, slice_len: usize) -> *mut Self {
+    pub(crate) fn as_wide_ptr(data: *mut u8, slice_len: usize) -> *mut Self {
         // TODO: use `ptr::from_raw_parts_mut` when available (https://github.com/rust-lang/rust/issues/81513)
 
         // Until then, `slice_from_raw_parts_mut` returns a raw wide pointer with the wrong type
